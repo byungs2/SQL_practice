@@ -1,0 +1,257 @@
+sqlplus system/manager
+@C:\oraclexe\app\oracle\product\11.2.0\server\rdbms\admin
+connect SCOTT/TIGER
+
+C:\OpenPose\VSCode
+02.sql openpose 하단에 ㅍㄹ더 생성 vscode의 file의 open folder 에서 만든 폴더 선택, 00.환경셋팅.sql로 파일 생성
+02.sql 하단에 1-6 select 파일들 압축 풀기 
+-- 1.select.sql
+/*
+primary key여도 중복되는 값이면 rownum 함께 정렬
+검색 학습
+1. select 문장
+	- 질의, query
+
+2. select 문장
+	1. select절
+	   from절
+	   -- from -> select 절
+
+	2. select절
+	   from절
+	   order by절  -- 정렬
+		-- from -> select절 -> order by 절
+
+	3. select절
+	   from절
+	   where절 -- 조건식	
+		-- from절 -> where절 -> select절
+
+	4. select절
+	   from절
+	   where절 -- 조건식	
+	   order by절
+	   -- from절 -> where절 -> select절 -> order by 절
+*/
+
+
+		
+--1. sqlplus창 보기 화면 여백 조절 편집 명령어
+	-- 단순 sqlplus tool만의 편집 명령어
+	-- 영구 저장 안됨. sqlplus 실행시마다 해 줘야 함
+set linesize 200
+set pagesize 200
+
+
+--2. 해당 계정의 모든 table 목록 검색
+select * from tab;
+
+
+--3. emp table의 모든 정보 검색
+select * from emp;
+
+
+--4. emp table의 구조 검색[묘사]
+desc emp;
+
+
+--5. emp table의 사번(empno)과 이름(ename)만 검색
+select empno, ename from emp;
+
+--6. emp table의 입사일(hiredate) 검색
+-- yy/mm/dd 형태로 검색 차후에 yyyy로 변경 예정
+select hiredate from emp;
+
+
+--7. emp table의 검색시 칼럼명 empno를 사번이란 별칭으로 검색 
+-- 컬럼명을 다른 별칭으로 대체해서
+-- 보안을 고려해야 하는 상황에 활용
+select empno as 사번
+from emp;
+
+select empno 사번
+from emp;
+
+
+--8. emp table에서 부서번호 검색시 중복 데이터 제거후 검색 
+select deptno from emp;  -- 중복검색 확인
+select distinct deptno from emp; -- 중복제거 검색, 내림차순으로 검색 -> 오름차순 검색?
+
+--9. 데이터를 오름차순(asc)으로 검색하기(순서 정렬)
+select distinct deptno from emp order by deptno asc;
+
+
+-- ? 사번(empno)을 오름차순(asc)으로 정렬(order by) 해서 사번만 검색
+select empno 
+from emp
+order by empno asc;
+
+
+-- 10.emp table 에서 deptno 내림차순(desc) 정렬(order by) 적용해서 
+-- ename과 deptno 검색하기
+select ename, deptno
+from emp
+order by deptno desc;
+
+-- deptno는 내림차순, 단 부서별 ename은 오름차순 정렬 
+select ename, deptno
+from emp
+order by deptno desc, ename asc;
+
+
+-- 11. 입사일(date 타입의 hiredate) 검색, 
+-- date 타입은 정렬가능 따라서 경력자(입사일이 오래된 직원)부터 검색(asc)
+select hiredate from emp;
+
+select hiredate 
+from emp
+order by hiredate asc;
+
+
+-- *** 연산식 ***
+--12. emp table의 모든 직원명(ename), 월급여(sal), 연봉(sal*12) 검색
+-- 단 sal 컴럼값은 comm을 제외한 sal만으로 연봉 검색
+
+select ename, sal as 월급여, sal*12 as 연봉
+from emp;
+
+
+-- 13. 모든 직원의 연봉 검색(sal *12 + comm) 검색
+select ename, sal as 월급여, sal*12+comm as 연봉
+from emp;
+-- 문제 발생 : null이라는 알수 없는 값을 보유한 컬럼과 연산시 데이터가 
+-- 다 알수 없는 null값으로 자동 변경....큰일!!!
+
+/* 해결책
+null값을 보유한 데이터는 0으로 치환해서 연산
+oracle 자체에서 제공하는 함수 : nvl(null보유한컬럼, 대체할데이터)
+*/
+select empno, comm from emp;
+select empno, comm, nvl(comm, 0) from emp;
+
+-- 모범답안
+select ename, sal as 월급여, sal*12+nvl(comm, 0) as 연봉 from emp;
+
+
+
+-- *** 조건식 ***
+-- * null 처리 : is null & is not null / nvl()
+
+--14. comm이 null인 사원만 대한 검색(ename, comm)
+select empno, ename, comm from emp;
+
+select empno, ename, comm
+from emp
+where comm is null;
+
+	
+--15. comm이 null이 아닌 사원에 대한 검색(ename, comm)
+select empno, ename, comm
+from emp
+where comm is not null;
+
+
+--16. ename, 전체연봉... comm 포함 연봉 검색
+select ename, sal*12 + nvl(comm, 0) from emp;
+
+--17. emp table에서 deptno 값이 20인(조건식 where) 직원 정보 모두(*) 출력하기  : = [sql 동등비교 연산자]
+select * 
+from emp
+where deptno=20;
+
+--? 검색된 데이터의 sal 값이 내림차순으로 정렬 검색 
+select empno, sal
+from emp
+order by sal desc;
+
+
+--18. emp table에서 ename이 smith(SMITH)에 해당하는 deptno값 검색
+select deptno, ename 
+from emp 
+where ename='SMITH';
+
+--19. sal가 900이상(>=)인 직원들의 이름(ename), sal 검색
+select ename, sal
+from emp
+where sal >= 900;
+
+--20. deptno가 10이고(deptno=10) (and) job이 메니저(job='MANAGER')인 사원이름 검색 
+select job from emp;
+select deptno, job from emp;
+
+select ename, deptno, job
+from emp
+where deptno=10 and job='MANAGER';
+
+
+-- 21. ?deptno가 10이거나(or) job이 메니저(MANAGER)인 사원이름(ename) 검색
+select ename, deptno, job
+from emp
+where deptno=10 or job='MANAGER';
+
+-- 22. deptno가 10(deptno != 10, deptno <> 10)이 아닌 모든 사원명(ename) 검색
+-- !=  or  <>
+select ename, deptno
+from emp
+where deptno != 10;
+
+select ename, deptno
+from emp
+where deptno <> 10;
+
+select ename, deptno
+from emp
+where not deptno=10;
+
+
+--23. sal이 2000 이하(sal<=2000)이거나(or) 3000이상인(sal>=3000) 사원명(ename) 검색
+select ename, sal
+from emp
+where sal <= 2000 or sal >= 3000;
+
+
+--24. comm이 300 or 500 or 1400인 사원명, comm 검색
+-- in 연산식으로 다중 or 연산식 표현 가능
+select ename, comm from emp;
+
+select ename, comm
+from emp
+where comm in (300, 500, 1400);
+	
+
+--25. ?comm이 300 or 500 or 1400이 아닌(not) 사원명, comm 검색
+select ename, comm
+from emp
+where comm not in (300, 500, 1400);
+
+
+-- 26. 81년도에 입사(hiredate)한 사원 이름(ename) 검색
+select hiredate from emp;
+-- 조건식 81/01/01 ~ 81/12/31 범위 입사 사원
+-- 날짜 표현이 맞는지 확인
+select empno, hiredate from emp where hiredate='81/02/22';
+
+-- 범위를 표현하는 연산식 : between ~ and
+select empno, hiredate 
+from emp 
+where hiredate between '81/01/01' and '81/12/31';
+
+
+-- 27. ename이 M으로 시작되는 모든 사원번호(empno), 이름(ename) 검색  
+-- 연산자 like : 한 음절 _ , 음절 개수 무관하게 검색할 경우 %
+
+select ename from emp;
+
+
+-- 28. ename이 M으로 시작되는 전체 자리수가 두철자의 사원번호, 이름 검색
+select empnom ename from emp where ename like 'M_';
+
+
+-- 29. 두번째 음절의 단어가 M인 모든 사원명 검색 
+select ename from emp where ename like '_M%';
+
+
+-- 30. 단어가 M을 포함한 모든 사원명 검색 
+
+
+

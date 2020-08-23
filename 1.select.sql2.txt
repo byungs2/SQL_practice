@@ -1,0 +1,124 @@
+-- 1.select.sql
+		
+--1. sqlplus창 보기 화면 여백 조절 편집 명령어
+	-- 단순 sqlplus tool만의 편집 명령어
+	-- 영구 저장 안됨. sqlplus 실행시마다 해 줘야 함
+set linesize 200
+set pagesize 200
+
+
+--2. 해당 계정의 모든 table 목록 검색
+select * from tab;
+
+
+--3. emp table의 모든 정보 검색
+select * from emp;
+
+
+--4. emp table의 구조 검색[묘사]
+desc emp;
+
+
+--5. emp table의 사번(empno)과 이름(ename)만 검색
+
+
+--6. emp table의 입사일(hiredate) 검색
+
+	
+--7. emp table의 검색시 칼럼명 empno를 사번이란 별칭으로 검색 
+
+
+--8. emp table에서 부서번호 검색시 중복 데이터 제거후 검색 
+	
+
+--9. 데이터를 오름차순(asc)으로 검색하기(순서 정렬)
+
+-- ? 사번을 오름차순으로 정렬 해서 사번만 검색
+
+
+
+-- 10.emp table 에서 deptno 내림차순 정렬 적용해서 ename과 deptno 검색하기
+
+
+--? empno와 deptno를 검색하되 단 deptno는 오름차순 검색
+
+
+
+-- 11. 입사일(date 타입의 hiredate) 검색, date 타입은 정렬가능 따라서 경력자(입사일이 오래된 직원)부터 검색(asc)
+
+
+
+
+-- *** 연산식 ***
+--12. emp table의 모든 직원명(ename), 월급여(sal), 연봉(sal*12) 검색
+-- 단 sal 컴럼값은 comm을 제외한 sal만으로 연봉 검색
+
+
+
+-- 13. 모든 직원의 연봉 검색(sal *12 + comm) 검색
+
+
+
+-- *** 조건식 ***
+--14. comm이 null인 사원에 대한 검색(ename, comm)
+
+	
+--15. comm이 null이 아닌 사원에 대한 검색(ename, comm)
+	
+
+--16. ename, 전체연봉... comm 포함 연봉 검색
+
+
+--17. emp table에서 deptno 값이 20인(조건식 where) 직원 정보 모두(*) 출력하기  : = [sql 동등비교 연산자]
+
+
+--? 검색된 데이터의 sal 값이 내림차순으로 정렬 검색 
+
+
+--18. emp table에서 ename이 smith(SMITH)에 해당하는 deptno값 검색
+
+
+--19. sal가 900이상(>=)인 직원들의 이름(ename), sal 검색
+
+
+--20. deptno가 10이고(and) job이 메니저인 사원이름 검색 
+
+
+-- 21. ?deptno가 10이거나(or) job이 메니저(MANAGER)인 사원이름(ename) 검색
+
+
+-- 22. deptno가 10이 아닌 모든 사원명(ename) 검색
+
+
+
+--23. sal이 2000 이하(sal<=2000)이거나(or) 3000이상인(sal>=3000) 사원명(ename) 검색
+
+
+
+
+--24. comm이 300 or 500 or 1400인 사원명, comm 검색
+	
+	
+
+--25. ?comm이 300 or 500 or 1400이 아닌(not) 사원명, comm 검색
+
+
+
+-- 26. 81년도에 입사(hiredate)한 사원 이름(ename) 검색
+
+
+
+-- 27. ename이 M으로 시작되는 모든 사원번호(empno), 이름(ename) 검색  
+-- 연산자 like : 한 음절 _ , 음절 개수 무관하게 검색할 경우 %
+
+
+-- 28. ename이 M으로 시작되는 전체 자리수가 두음절의 사원번호, 이름 검색
+
+
+-- 29. 두번째 음절의 단어가 M인 모든 사원명 검색 
+
+
+-- 30. 단어가 M을 포함한 모든 사원명 검색 
+
+
+

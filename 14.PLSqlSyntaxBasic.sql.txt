@@ -1,0 +1,295 @@
+﻿--14.PLSqlSyntaxBasic.sql
+
+/* 
+프로시저 & 함수
+1. 프로시저
+	- 호출 방법이 함수와는 차이가 있다
+	- 재사용을 위한 기능 구현
+2. 함수 : oracle 함수 호출하듯 사용자 정의 함수 호출 가능
+
+1. oracle db만의 프로그래밍 개발 방법
+	1. 이름 없이 단순 개발
+	2. 프로스저라는 타이틀로 개발 - 이름 부여(재사용)
+	3. 함수라는 타이틀로 개발 - 이름 부여(재사용)
+
+2. 장점
+	- 단 한번의 실행 만으로 내장 함수처럼 만들어서 필요시 호출해서 실행 가능
+	- 프로시저와 함수로 구현시 db내부에 pcode로 변환 즉 
+	java 관점에서는 컴파일해서 사용 가능하게 메모리에 로딩이라 간주
+	메모리에 로딩 된 것들은 컴파일 할 필요가 없다.
+	따라서 실행속도 관점에서 Perfomance 향상
+
+3. test를 위한 필수 셋팅 
+	- set serveroutput on 
+	
+4. 필수 암기 
+	1. 할당(대입) 연산자  :=
+	2. 선언, 시작, 끝
+		declare ~ begin ~ end; /
+*/
+
+--1. 실행 결과 확인을 위한 필수 설정 명령어
+set serveroutput on
+
+
+--2. 연산을 통한 간단한 문법 습득
+declare
+	no integer;
+begin
+	no := 10;
+	dbms_output.put_line('결과 ' || no);
+end;
+/
+declare
+	no integer;
+begin
+	no := 10/5;
+	dbms_output.put_line('결과 ' || no);
+end;
+/
+
+
+--3. 연산을 통한 간단한 문법 습득 + 예외 처리 문장
+-- 혹여 문제가 생겨도 프로그램 종료가 아닌 유연한 실행 유지
+-- others는 모든 exception을 지칭
+-- 예외처리시 실행 유지, 예외 미 처리시 강제종료
+declare
+	no integer;
+begin
+	no := 10;
+	dbms_output.put_line('결과 ' || no);
+
+	no := 10/0;
+	dbms_output.put_line('결과 ' || no);
+	exception 
+		when others then
+			dbms_output.put_line('예외 발생');
+
+	dbms_output.put_line('실행 확인용');
+end;
+/
+
+--4. ? 나만의 작품 만들어 보기
+declare
+	sum integer;
+begin
+	sum := 10/0;
+	exception
+		when others then
+			dbms_output.put_line('예외 발생');
+
+		dbms_output.put_line('실행 확인용');
+
+end;
+/
+
+
+--5. 중첩 block & 변수 선언 위치에 따른 구분
+
+-- step 01 - 전역, 로컬 변수 선언 및 활용
+declare
+	v_global varchar2(10) := 'global';
+begin
+	declare
+		v_local varchar2(10) := 'local';
+	begin
+		dbms_output.put_line(v_global);
+		dbms_output.put_line(v_local);
+	end;
+end;
+/
+
+-- step 02 - 전역, 로컬 변수 선언 및 활용 범위 확인
+declare
+	v_global varchar2(10) := 'global';
+begin
+	declare
+		v_local varchar2(10) := 'local';
+	begin
+		dbms_output.put_line(v_global);
+		dbms_output.put_line(v_local);
+	end;
+	dbms_output.put_line(v_global);
+	-- dbms_output.put_line(v_local); 로컬변수는 중첩블럭 내부에서만 사용 가능
+end;
+/
+
+
+--6. emp01 table의 컬럼 타입을 그대로 사용하고 싶다면?
+	-- %type  db 내부 특정 컬럼의 타입을 그대로 가져오는 표기법 학습
+drop emp01;
+create table emp01 as select * from emp;
+
+declare
+	v_empno emp01.empno%type;
+	v_ename emp01.ename%type;
+begin
+	select empno, ename into v_empno, v_ename from emp01 where empno = 7369;
+	dbms_output.put_line(v_empno || v_ename);
+end;
+/
+
+--7. 이미 존재하는 table의 record의 모든 컬럼 타입 활용 키워드 : %rowtype
+/* 7369 사번으로 해당 사원의 모든 정보를 검색해서 사번, 이름만 착출해서 출력 */
+
+
+declare
+	v_rows emp01%rowtype;
+begin
+	select * into v_rows from emp01 where empno = 7369;
+	dbms_output.put_line(v_rows.ename);
+end;
+/
+
+
+
+--8. ???
+-- emp05라는 table을 데이터 없이 emp table로 부터 생성하기
+-- %rowtype을 사용하셔서 emp의 사번이 7369인 사원 정보 검색해서 
+-- emp05 table에 insert
+-- 힌트 : begin 부분엔 다수의 sql문장 작성 가능 
+drop table emp05;
+create table emp05 as select * from emp where 1=0;
+select * from emp05;
+declare
+	v_rows emp05%rowtype;
+begin
+	select * into v_rows from emp01 where empno = 7369;
+	insert into emp05 values v_rows;
+	commit;
+end;
+/
+select * from emp05;
+
+
+
+--9. 조건식
+/*  1. 단일 조건식
+	if(조건) then
+		
+	end if;
+	
+   2. 다중 조건
+	if(조건1) then
+		조건1이 true인 경우 실행되는 블록 
+	elsif(조건2) then
+		조건2가 true인 경우 실행되는 블록
+	end if; 
+*/
+-- 사원의 연봉을 계산하는 procedure 개발[comm이 null인 직원들은 0으로 치환]
+
+declare
+	v_emp emp%rowtype;
+	total_sal number(7,2);
+begin
+	select empno, ename, sal, comm into v_emp.empno, v_emp.ename, v_emp.sal, v_emp.comm from emp where ename = 'ALLEN';
+	
+	if(v_emp.comm is null) then v_emp.comm := 0;
+	end if;
+
+	total_sal := v_emp.sal*12 + v_emp.comm;
+	dbms_output.put_line(total_sal);
+end;
+/
+
+
+
+-- 10.??? 실행시 가변적인 데이터 적용해 보기
+-- 실행시마다 가변적인 데이터(동적 데이터) 반영하는 문법 : 변수 선언시 "&변수명"
+
+-- emp table의 deptno=10 : ACCOUNT 출력, 
+-- deptno=20 이라면 RESEARCH 출력
+-- test data는 emp table의 각 사원의 사번(empno)
+declare
+	ck_empno emp.empno%type := &v;
+	v_empno emp.empno%type;
+	v_deptno emp.deptno%type;
+	v_dname varchar2(10);
+begin
+	select empno, deptno into v_empno, v_deptno from emp where empno = ck_empno;
+	if(v_deptno = 10) then
+		dbms_output.put_line('ACCOUNT');
+	elsif(v_deptno = 20) then
+		dbms_output.put_line('RESEARCH');
+	else 
+		dbms_output.put_line('nothing');
+	end if;
+end;
+/
+
+
+
+
+--11. 반복문
+/* 
+1. 기본
+	loop 
+		exit 조건;
+	end loop;
+
+	declare
+		num number(2) := 0;
+	begin
+		loop
+			dbms_output.put_line(num);
+			num := num + 1;
+			exit when num > 5;
+		end loop;
+	end;
+	/
+
+2. while 기본문법
+	 while 조건식 loop
+		plsql 문장;
+	 end loop;
+
+	declare
+		num number(2) := 0;
+	begin
+		while num < 6 loop
+			dbms_output.put_line(num);
+			num := num + 1;
+		end loop;
+	end;
+	/
+
+3. for 기본 문법
+	for 변수 in [reverse] start ..end loop
+		plsql문장
+	end loop;
+*/
+	declare
+
+	begin
+		for num in 0..4 loop
+			dbms_output.put_line(num);
+		end loop;
+	end;
+	/
+
+	declare
+
+	begin
+		for num in reverse 0..4 loop
+			dbms_output.put_line(num);
+		end loop;
+	end;
+	/
+-- 역순 출력 
+
+
+--12.? emp table 직원들의 사번을 입력받아서 해당하는 사원의 이름 음절 수 만큼 * (한line)표 찍기 
+
+declare
+	ck_empno emp.empno%type := &v;
+	v_ename emp.ename%type;
+	v_number number;
+	v_char varchar2(10);
+begin	
+	select ename, length(ename) into v_ename, v_number from emp where empno = ck_empno;
+	for i in 0..v_number loop
+		v_char := v_char || '*';
+	end loop;
+dbms_output.put_line(v_ename || '님의 이름 길이는' || v_char);
+end;
+/

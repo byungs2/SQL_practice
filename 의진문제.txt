@@ -1,0 +1,9 @@
+1. emp table로부터 입사 후 기준일 (81-06-01)까지 6개월 이상이면 갑, 3개월 이상이면 을 
+나머지는 무로 이름과 함께 조회하시오.
+select ename, hiredate, case when hiredate - to_date('81-06-01') > '180' then '갑' when hiredate - to_date('81-06-01') > '90' then '을'  else '무' end from emp;
+select ename, hiredate, decode(hiredate, (hiredate-'81-06-01')>6, '갑') from emp;
+
+
+2. emp table에서 사번(empno)이 짝수인 사원의 이름(ename), 사번(empno) 검색
+select ename, empno from emp where mod(empno,2) = 0;
+

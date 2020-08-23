@@ -1,0 +1,82 @@
+﻿--12.sequence.sql
+/*
+1. 시퀀스 
+	: 순차적인 순서 번호를 자동으로 반영할수 있는 매우 유용한 기술
+	: 기본은 1씩 자동 증가
+		- 증가치, 최대값 추가 설정도 가능
+		- 권장 : 하나의 시퀀스를 다수의 table에서 사용 비추
+
+2. 대표적인 활용 영역
+	- 게시물 글번호에 주로 사용
+	1. 카페 게시글이 중복되는 번호 없음
+	2. 1000개의 501번째 작성자.. 차후에 삭제
+		then 501번 없는 상태로 유지
+	3. 개발자 관점에서 
+		게시글 번호를 직접 코드로 관리 
+		게시글 카운트하여 최종 맥스에 +1 insert
+		insert시에 자동 증가되는 db자체 기능 활용 ---> 선호 및 권장
+			: oracle sequence/myssql outo increment
+3. db에서 객체라는 용어 사용
+	table, view, sequence도 객체라고 한다.	
+
+4. 특징
+	1. create sequence 로 생성
+	2. drop sequence로 삭제
+	3. sequence 사용하기 위한 제약 조건
+		- nextval 속성을 한번 이상 사용해야 currval 사용 가능
+	4. 두개의 속성
+		1. currval - 현 sequence 데이터
+		2. nextval - 자동 증가 시키는 중복되지 않는 데이터
+					- insert시에 주로 사용하게 된다		
+	5. 주의사항
+		가급적 하나의 테이블에만 종속적으로 사용 권장
+*/	
+	     
+--1. sequence 생성 명령어
+	create sequence seq_test;
+	select seq_test.currval from dual;
+--2. seq~를 활용한 insert
+	drop table test;
+	create table test(
+		no1 number(3)
+	);
+	insert into test values(seq_test.nextval);
+	select * from test;
+	select seq_test.currval from dual;
+--3. 다수의 table에서 하나의 seq를 공동 사용시? currval이 새로운 테이블에 첫 값으로 입력되버린다
+	drop table test2;
+	create table test2(
+		no1 number(3)
+	);
+	insert into test2 values(seq_test.nextval);
+	select * from test2;
+	select seq_test.currval from dual;
+
+--4. 시작 index 지정 및 증가치도 지정하는 seq 생성 명령어
+-- 시작치, 증가치, 최대치 설정이 가능하나 사용 빈도는 적응
+-- maxvalue 초과시 실행 오류 발생
+drop sequence seq_test_no1;
+create sequence seq_test_no1
+start with 10
+increment by 2
+maxvalue 20;
+
+drop table test;
+create table test(
+	no1 number(3)
+);
+insert into test values(seq_test_no1.nextval);
+select * from test;
+select seq_test_no1.currval from dual;
+
+--5. seq 삭제 명령어
+drop sequence seq_test_no1;
+
+--6. 현 sequence의 데이터값 검색하기
+select seq_test.currval from dual;
+
+
+
+
+
+
